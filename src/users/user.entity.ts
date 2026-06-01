@@ -2,8 +2,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Book } from '../books/book.entity';
 
 @Entity('users')
 export class User {
@@ -21,6 +23,9 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @OneToMany(() => Book, (book) => book.user)
+  books!: Book[];
 }
 
 export type PublicUser = Omit<User, 'passwordHash'>;

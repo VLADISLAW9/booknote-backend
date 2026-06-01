@@ -10,6 +10,6 @@ import { PasswordService } from './password.service';
   imports: [UsersModule],
   controllers: [AuthController],
   providers: [AuthService, JwtAuthGuard, JwtService, PasswordService],
-  exports: [AuthService, JwtAuthGuard],
+  exports: [AuthService, JwtAuthGuard, JwtService],
 })
 export class AuthModule {}
