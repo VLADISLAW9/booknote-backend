@@ -1,38 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import type { CreateUserInput, PublicUser, User } from './user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+import type { CreateUserInput, PublicUser } from './user.entity';
 
 @Injectable()
 export class UsersService {
-  private readonly users = new Map<string, User>();
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
-  create(input: CreateUserInput): User {
-    const user: User = {
-      id: randomUUID(),
-      email: input.email,
-      name: input.name,
-      passwordHash: input.passwordHash,
-      createdAt: new Date().toISOString(),
-    };
+  async create(input: CreateUserInput): Promise<User> {
+    const user = this.usersRepository.create(input);
 
-    this.users.set(user.id, user);
-    return user;
+    return this.usersRepository.save(user);
   }
 
-  findByEmail(email: string): User | null {
+  async findByEmail(email: string): Promise<User | null> {
     const normalizedEmail = email.trim().toLowerCase();
 
-    for (const user of this.users.values()) {
-      if (user.email === normalizedEmail) {
-        return user;
-      }
-    }
-
-    return null;
+    return this.usersRepository.findOne({ where: { email: normalizedEmail } });
   }
 
-  findById(id: string): User | null {
-    return this.users.get(id) ?? null;
+  async findById(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { id } });
   }
 
   toPublicUser(user: User): PublicUser {

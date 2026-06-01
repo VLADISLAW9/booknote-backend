@@ -16,7 +16,7 @@ export class JwtAuthGuard implements CanActivate {
     private readonly usersService: UsersService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractBearerToken(request);
 
@@ -25,7 +25,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const payload = this.jwtService.verify(token);
-    const user = this.usersService.findById(payload.sub);
+    const user = await this.usersService.findById(payload.sub);
 
     if (!user) {
       throw new UnauthorizedException('User no longer exists');

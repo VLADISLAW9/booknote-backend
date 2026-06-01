@@ -1,9 +1,26 @@
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  passwordHash: string;
-  createdAt: string;
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+@Entity('users')
+export class User {
+  @PrimaryGeneratedColumn('uuid')
+  id!: string;
+
+  @Column({ unique: true })
+  email!: string;
+
+  @Column()
+  name!: string;
+
+  @Column()
+  passwordHash!: string;
+
+  @CreateDateColumn()
+  createdAt!: Date;
 }
 
 export type PublicUser = Omit<User, 'passwordHash'>;

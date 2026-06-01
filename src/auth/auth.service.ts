@@ -23,14 +23,14 @@ export class AuthService {
     this.validateRegisterDto(dto);
 
     const email = dto.email.trim().toLowerCase();
-    const existingUser = this.usersService.findByEmail(email);
+    const existingUser = await this.usersService.findByEmail(email);
 
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
     const passwordHash = await this.passwordService.hash(dto.password);
-    const user = this.usersService.create({
+    const user = await this.usersService.create({
       email,
       name: dto.name.trim(),
       passwordHash,
@@ -43,7 +43,7 @@ export class AuthService {
     this.validateLoginDto(dto);
 
     const email = dto.email.trim().toLowerCase();
-    const user = this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
