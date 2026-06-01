@@ -2,38 +2,46 @@
 
 ## Project Context
 
-This repository contains the backend for a web application that tracks books users have read. Keep domain language and feature boundaries aligned with reading progress, books, notes, users, and related library workflows.
+NestJS backend for Booknote, a web app for tracking a user's book library and reading progress. Core domains are users, JWT authentication, and user-owned books.
 
 ## Project Structure & Module Organization
 
-This is a NestJS backend written in TypeScript. Application code lives in `src/`: `main.ts` bootstraps the HTTP server, `app.module.ts` wires providers/controllers, and the starter `app.controller.ts` / `app.service.ts` show the expected Nest module pattern. Build output goes to `dist/` and should not be edited. Keep new features grouped by domain under `src/<feature>/` with the usual Nest files, for example `books/books.module.ts`, `books/books.controller.ts`, and `books/books.service.ts`. Unit tests should sit beside implementation files as `*.spec.ts`; e2e tests, when added, belong under `test/`.
+Application code lives in `src/`. `main.ts` bootstraps Nest and Swagger; `app.module.ts` wires TypeORM and feature modules. Domain code is grouped by folder: `src/auth/` for registration, login, JWT, password hashing, and guards; `src/users/` for the user entity and repository service; `src/books/` for book CRUD, DTOs, and entity; `src/database/` for SQLite config. Do not edit `dist/` or `data/*.sqlite`.
 
-## Build, Test, and Development Commands
+## Build, Run, and Development Commands
 
-Use Yarn, as this repo includes `yarn.lock`.
+Use Yarn because this repo includes `yarn.lock`.
 
 - `yarn install`: install dependencies.
-- `yarn start`: run the app once with Nest.
-- `yarn start:dev`: run in watch mode for local development.
+- `yarn start`: run the compiled Nest app.
+- `yarn start:dev`: run Nest in watch mode.
 - `yarn build`: compile TypeScript to `dist/`.
+- `yarn typecheck`: run `tsc --noEmit`.
 - `yarn lint`: run ESLint and apply safe fixes.
-- `yarn format`: run Prettier on `src/**/*.ts` and `test/**/*.ts`.
-- `yarn test`: run unit tests with Jest.
-- `yarn test:cov`: run Jest with coverage output in `coverage/`.
-- `yarn test:e2e`: run e2e tests using `test/jest-e2e.json` once that config exists.
+- `yarn format`: run Prettier over TypeScript files.
+
+Swagger UI: `http://localhost:3000/api/docs`. OpenAPI JSON: `/api/docs-json`.
 
 ## Coding Style & Naming Conventions
 
-Follow NestJS conventions: classes use `PascalCase`, providers/controllers/modules use descriptive suffixes such as `BookService`, `BookController`, and `BookModule`, and files use kebab-case with Nest suffixes like `book.service.ts`. Prefer dependency injection over manual construction. ESLint uses TypeScript-aware rules plus Prettier; run `yarn lint` and `yarn format` before submitting changes. The TypeScript target is ES2023, decorators are enabled, and `strictNullChecks` is on, so handle nullable values explicitly.
+Follow NestJS conventions: modules, controllers, services, entities, and DTOs stay in their feature folder. Use `PascalCase` for classes such as `BooksService` and `CreateBookDto`; use kebab-case filenames such as `books.service.ts`. Prefer constructor injection and repository services. Controller DTOs should be classes for Swagger.
+
+## Database & Configuration
+
+The app uses TypeORM with SQLite. Default path is `data/booknote.sqlite`; override with `DATABASE_PATH`. `synchronize: true` is enabled for early development, but replace it with migrations before production. JWT uses `JWT_SECRET` and optional `JWT_EXPIRES_IN`; set a strong secret outside local development.
+
+## API Guidelines
+
+Book endpoints are protected by `JwtAuthGuard` and must scope reads/writes by `userId`. Never fetch, update, or delete a book by `id` alone. Reading statuses are stored as `reading`, `read`, and `not_read`; API input may also accept `Читаю`, `Прочитана`, and `Не прочитана`.
 
 ## Testing Guidelines
 
-Jest is configured in `package.json` with `rootDir: "src"` and `testRegex: ".*\\.spec\\.ts$"`. Add focused unit tests beside the code they cover, for example `books.service.spec.ts`. Use `@nestjs/testing` for modules/providers and mock external boundaries. Run `yarn test` for normal checks and `yarn test:cov` when changing shared logic or behavior with meaningful branching.
+Automated tests are intentionally absent. Do not add Jest or test scripts unless the team explicitly reintroduces tests. Verify changes with `yarn lint`, `yarn typecheck`, `yarn build`, and targeted manual API checks through Swagger or HTTP requests.
 
 ## Commit & Pull Request Guidelines
 
-This repository currently has no commit history to infer a house style. Use concise, imperative commit messages such as `Add books service` or `Fix validation error handling`. Pull requests should describe the change, list test commands run, call out configuration or migration impact, and link related issues when available. Include API examples or screenshots only when the external behavior changes.
+There is no commit history to infer a house style. Use concise, imperative messages such as `Add books CRUD` or `Document auth endpoints`. Pull requests should describe behavior changes, list verification commands, and call out schema, auth, or configuration impact.
 
-## Security & Configuration Tips
+## Security Tips
 
-Do not commit secrets, local `.env` files, generated coverage, or `dist/`. Keep environment-specific values behind configuration providers rather than hardcoding them in modules or services.
+Do not commit secrets, `.env` files, SQLite data files, `dist/`, or generated local artifacts. Keep all user-owned resources scoped to the authenticated user and avoid returning password hashes from any response.
