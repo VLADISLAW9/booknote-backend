@@ -1,5 +1,7 @@
-import type { LoginDto } from './login.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { LoginDto } from './login.dto';
 
-export interface RegisterDto extends LoginDto {
-  name: string;
+export class RegisterDto extends LoginDto {
+  @ApiProperty({ example: 'Reader Name', minLength: 2 })
+  name!: string;
 }
