@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Post,
   Req,
   UnauthorizedException,
@@ -9,6 +10,8 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -18,6 +21,10 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import {
+  AuthResponseDto,
+  PublicUserResponseDto,
+} from './dto/auth-response.dto';
 import type { AuthenticatedRequest } from './types/authenticated-request';
 
 @ApiTags('Auth')
@@ -26,9 +33,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({
-    status: 201,
+  @ApiCreatedResponse({
     description: 'User registered and JWT returned.',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Email, password, or name is invalid.',
   })
   @ApiResponse({
     status: 409,
@@ -40,8 +51,13 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 201, description: 'JWT returned.' })
+  @ApiOkResponse({ description: 'JWT returned.', type: AuthResponseDto })
+  @ApiResponse({
+    status: 400,
+    description: 'Email or password format is invalid.',
+  })
   @ApiResponse({ status: 401, description: 'Invalid email or password.' })
+  @HttpCode(200)
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -49,7 +65,10 @@ export class AuthController {
 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user' })
-  @ApiResponse({ status: 200, description: 'Current user returned.' })
+  @ApiOkResponse({
+    description: 'Current user returned.',
+    type: PublicUserResponseDto,
+  })
   @ApiResponse({
     status: 401,
     description: 'Bearer token is missing or invalid.',
