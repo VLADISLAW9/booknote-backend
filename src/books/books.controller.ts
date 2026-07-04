@@ -15,13 +15,17 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AuthenticatedRequest } from '../auth/types/authenticated-request';
+import {
+  ApiWrappedErrorResponse,
+  ApiWrappedSuccessResponse,
+} from '../common/swagger/api-response.decorators';
 import { BooksService } from './books.service';
+import { BookResponseDto } from './dto/book-response.dto';
 import { CreateBookDto } from './dto/create-book.dto';
 import { GetBooksQueryDto } from './dto/get-books-query.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
@@ -34,10 +38,16 @@ export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @ApiOperation({ summary: 'Get current user books' })
-  @ApiResponse({ status: 200, description: 'Books returned.' })
-  @ApiResponse({
+  @ApiWrappedSuccessResponse({
+    status: 200,
+    description: 'Books returned.',
+    type: BookResponseDto,
+    isArray: true,
+  })
+  @ApiWrappedErrorResponse({
     status: 401,
     description: 'Bearer token is missing or invalid.',
+    example: 'Токен авторизации отсутствует или недействителен',
   })
   @Get()
   findAll(@Query() query: GetBooksQueryDto, @Req() request: Request) {
@@ -52,8 +62,16 @@ export class BooksController {
 
   @ApiOperation({ summary: 'Get one current user book by id' })
   @ApiParam({ name: 'id', description: 'Book id' })
-  @ApiResponse({ status: 200, description: 'Book returned.' })
-  @ApiResponse({ status: 404, description: 'Book was not found.' })
+  @ApiWrappedSuccessResponse({
+    status: 200,
+    description: 'Book returned.',
+    type: BookResponseDto,
+  })
+  @ApiWrappedErrorResponse({
+    status: 404,
+    description: 'Book was not found.',
+    example: 'Книга не найдена',
+  })
   @Get(':id')
   findOne(@Param('id') id: string, @Req() request: Request) {
     const user = (request as AuthenticatedRequest).user;
@@ -67,8 +85,16 @@ export class BooksController {
 
   @ApiOperation({ summary: 'Delete current user book by id' })
   @ApiParam({ name: 'id', description: 'Book id' })
-  @ApiResponse({ status: 200, description: 'Book deleted.' })
-  @ApiResponse({ status: 404, description: 'Book was not found.' })
+  @ApiWrappedSuccessResponse({
+    status: 200,
+    description: 'Book deleted.',
+    nullable: true,
+  })
+  @ApiWrappedErrorResponse({
+    status: 404,
+    description: 'Book was not found.',
+    example: 'Книга не найдена',
+  })
   @Delete(':id')
   remove(@Param('id') id: string, @Req() request: Request) {
     const user = (request as AuthenticatedRequest).user;
@@ -82,8 +108,16 @@ export class BooksController {
 
   @ApiOperation({ summary: 'Partially update current user book by id' })
   @ApiParam({ name: 'id', description: 'Book id' })
-  @ApiResponse({ status: 200, description: 'Book updated.' })
-  @ApiResponse({ status: 404, description: 'Book was not found.' })
+  @ApiWrappedSuccessResponse({
+    status: 200,
+    description: 'Book updated.',
+    type: BookResponseDto,
+  })
+  @ApiWrappedErrorResponse({
+    status: 404,
+    description: 'Book was not found.',
+    example: 'Книга не найдена',
+  })
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -100,8 +134,16 @@ export class BooksController {
   }
 
   @ApiOperation({ summary: 'Add a book to current user library' })
-  @ApiResponse({ status: 201, description: 'Book created.' })
-  @ApiResponse({ status: 400, description: 'Invalid book payload.' })
+  @ApiWrappedSuccessResponse({
+    status: 201,
+    description: 'Book created.',
+    type: BookResponseDto,
+  })
+  @ApiWrappedErrorResponse({
+    status: 400,
+    description: 'Invalid book payload.',
+    example: 'Данные книги указаны некорректно',
+  })
   @Post()
   create(@Body() dto: CreateBookDto, @Req() request: Request) {
     const user = (request as AuthenticatedRequest).user;

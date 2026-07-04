@@ -1,14 +1,19 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  READING_STATUS_VALUES,
+  ReadingStatus,
+} from '../enums/reading-status.enum';
 
 export class GetBooksQueryDto {
   @ApiPropertyOptional({ example: 'architecture' })
   title?: string;
 
   @ApiPropertyOptional({
-    example: 'reading',
-    enum: ['reading', 'read', 'not_read', 'Читаю', 'Прочитана', 'Не прочитана'],
+    example: ReadingStatus.Reading,
+    enum: READING_STATUS_VALUES,
+    enumName: 'ReadingStatus',
   })
-  readingStatus?: string;
+  readingStatus?: ReadingStatus;
 
   @ApiPropertyOptional({ example: 'software' })
   genre?: string;

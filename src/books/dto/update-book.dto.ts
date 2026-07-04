@@ -1,4 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  READING_STATUS_VALUES,
+  ReadingStatus,
+} from '../enums/reading-status.enum';
 
 export class UpdateBookDto {
   @ApiPropertyOptional({ example: 'Clean Architecture' })
@@ -17,10 +21,11 @@ export class UpdateBookDto {
   currentPage?: number;
 
   @ApiPropertyOptional({
-    example: 'Прочитана',
-    enum: ['reading', 'read', 'not_read', 'Читаю', 'Прочитана', 'Не прочитана'],
+    example: ReadingStatus.Read,
+    enum: READING_STATUS_VALUES,
+    enumName: 'ReadingStatus',
   })
-  readingStatus?: string;
+  readingStatus?: ReadingStatus;
 
   @ApiPropertyOptional({
     example: 'https://example.com/cover.jpg',

@@ -91,6 +91,7 @@ export class ApiExceptionFilter implements ExceptionFilter {
 
     const translations: Record<string, string> = {
       'A valid email is required': 'Укажите корректный email',
+      'Access token is required': 'Access token отсутствует',
       'At least one book field is required':
         'Укажите хотя бы одно поле книги для изменения',
       'Author is required': 'Укажите автора книги',
@@ -112,6 +113,12 @@ export class ApiExceptionFilter implements ExceptionFilter {
       'Genre is required': 'Укажите жанр книги',
       'Invalid book payload.': 'Данные книги указаны некорректно',
       'Invalid email or password': 'Неверный email или пароль',
+      'Invalid access token': 'Access token недействителен',
+      'Invalid auth cookie': 'Cookie авторизации недействительна',
+      'Invalid refresh token': 'Refresh token недействителен',
+      'Invalid token': 'Токен недействителен',
+      'Invalid token payload': 'Данные токена недействительны',
+      'Invalid token signature': 'Подпись токена недействительна',
       'Name must contain at least 2 characters':
         'Имя должно содержать минимум 2 символа',
       'Optional text fields must be strings':
@@ -119,8 +126,11 @@ export class ApiExceptionFilter implements ExceptionFilter {
       'Password must contain at least 8 characters':
         'Пароль должен содержать минимум 8 символов',
       'Reading status must be a string': 'Статус чтения должен быть строкой',
-      'Reading status must be one of: reading, read, not_read':
-        'Статус чтения должен быть одним из: reading, read, not_read',
+      'Reading status must be one of: Читаю, Прочитано, Не прочитано':
+        'Статус чтения должен быть одним из: Читаю, Прочитано, Не прочитано',
+      'Refresh token is missing or invalid.':
+        'Refresh token отсутствует или недействителен',
+      'Refresh token is required': 'Refresh token отсутствует',
       'Started at must be a valid date':
         'Дата начала чтения должна быть корректной',
       'Started at must be an ISO date string':
@@ -128,7 +138,9 @@ export class ApiExceptionFilter implements ExceptionFilter {
       'Title is required': 'Укажите название книги',
       'Total pages must be a positive integer':
         'Общее количество страниц должно быть положительным целым числом',
+      'Token has expired': 'Срок действия токена истек',
       'User is not authenticated': 'Пользователь не авторизован',
+      'User no longer exists': 'Пользователь больше не существует',
       'User with this email already exists':
         'Пользователь с таким email уже существует',
     };

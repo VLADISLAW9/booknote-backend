@@ -8,12 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
-
-export enum ReadingStatus {
-  Reading = 'reading',
-  Read = 'read',
-  NotRead = 'not_read',
-}
+import { ReadingStatus } from './enums/reading-status.enum';
 
 @Entity('books')
 export class Book {

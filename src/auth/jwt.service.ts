@@ -8,6 +8,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 export interface JwtPayload {
   sub: string;
   email: string;
+  type: 'access' | 'refresh';
   iat?: number;
   exp?: number;
 }
@@ -15,11 +16,65 @@ export interface JwtPayload {
 @Injectable()
 export class JwtService {
   private readonly secret = process.env.JWT_SECRET ?? 'dev-only-change-me';
-  private readonly expiresInSeconds = Number(
+  private readonly accessTokenExpiresInSeconds = Number(
     process.env.JWT_EXPIRES_IN ?? 3600,
   );
+  private readonly refreshTokenExpiresInSeconds = Number(
+    process.env.JWT_REFRESH_EXPIRES_IN ?? 60 * 60 * 24 * 30,
+  );
 
-  sign(payload: Omit<JwtPayload, 'iat' | 'exp'>): string {
+  signAccessToken(payload: Omit<JwtPayload, 'iat' | 'exp' | 'type'>): string {
+    return this.sign(
+      {
+        ...payload,
+        type: 'access',
+      },
+      this.accessTokenExpiresInSeconds,
+    );
+  }
+
+  signRefreshToken(payload: Omit<JwtPayload, 'iat' | 'exp' | 'type'>): string {
+    return this.sign(
+      {
+        ...payload,
+        type: 'refresh',
+      },
+      this.refreshTokenExpiresInSeconds,
+    );
+  }
+
+  verifyAccessToken(token: string): JwtPayload {
+    const payload = this.verify(token);
+
+    if (payload.type !== 'access') {
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    return payload;
+  }
+
+  verifyRefreshToken(token: string): JwtPayload {
+    const payload = this.verify(token);
+
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    return payload;
+  }
+
+  getRefreshTokenMaxAgeMs(): number {
+    return this.refreshTokenExpiresInSeconds * 1000;
+  }
+
+  getAccessTokenMaxAgeMs(): number {
+    return this.accessTokenExpiresInSeconds * 1000;
+  }
+
+  private sign(
+    payload: Omit<JwtPayload, 'iat' | 'exp'>,
+    expiresInSeconds: number,
+  ): string {
     if (!this.secret || this.secret.length < 16) {
       throw new InternalServerErrorException('JWT_SECRET must be configured');
     }
@@ -28,7 +83,7 @@ export class JwtService {
     const fullPayload: JwtPayload = {
       ...payload,
       iat: issuedAt,
-      exp: issuedAt + this.expiresInSeconds,
+      exp: issuedAt + expiresInSeconds,
     };
     const encodedHeader = this.base64UrlEncode(
       JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
@@ -40,7 +95,7 @@ export class JwtService {
     return `${unsignedToken}.${signature}`;
   }
 
-  verify(token: string): JwtPayload {
+  private verify(token: string): JwtPayload {
     const [encodedHeader, encodedPayload, signature] = token.split('.');
 
     if (!encodedHeader || !encodedPayload || !signature) {
@@ -56,7 +111,7 @@ export class JwtService {
 
     const payload = this.parsePayload(encodedPayload);
 
-    if (!payload.sub || !payload.email) {
+    if (!payload.sub || !payload.email || !payload.type) {
       throw new UnauthorizedException('Invalid token payload');
     }
 

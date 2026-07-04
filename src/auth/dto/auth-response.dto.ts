@@ -18,15 +18,6 @@ export class PublicUserResponseDto {
 }
 
 export class AuthResponseDto {
-  @ApiProperty({
-    description: 'JWT access token for authenticated requests.',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-  })
-  accessToken!: string;
-
-  @ApiProperty({ example: 'Bearer' })
-  tokenType!: 'Bearer';
-
   @ApiProperty({ type: PublicUserResponseDto })
   user!: PublicUserResponseDto;
 }

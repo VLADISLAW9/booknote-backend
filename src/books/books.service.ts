@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Book, ReadingStatus } from './book.entity';
+import { Book } from './book.entity';
 import type { CreateBookDto } from './dto/create-book.dto';
 import type { GetBooksQueryDto } from './dto/get-books-query.dto';
 import type { UpdateBookDto } from './dto/update-book.dto';
+import {
+  READING_STATUS_VALUES,
+  ReadingStatus,
+} from './enums/reading-status.enum';
 
 @Injectable()
 export class BooksService {
@@ -244,24 +248,15 @@ export class BooksService {
       throw new BadRequestException('Reading status must be a string');
     }
 
-    const normalizedValue = value.trim().toLowerCase();
-    const statuses: Record<string, ReadingStatus> = {
-      reading: ReadingStatus.Reading,
-      read: ReadingStatus.Read,
-      not_read: ReadingStatus.NotRead,
-      читаю: ReadingStatus.Reading,
-      прочитана: ReadingStatus.Read,
-      'не прочитана': ReadingStatus.NotRead,
-    };
-    const status = statuses[normalizedValue];
+    const status = value.trim();
 
-    if (!status) {
+    if (!READING_STATUS_VALUES.includes(status as ReadingStatus)) {
       throw new BadRequestException(
-        'Reading status must be one of: reading, read, not_read',
+        'Reading status must be one of: Читаю, Прочитано, Не прочитано',
       );
     }
 
-    return status;
+    return status as ReadingStatus;
   }
 
   private optionalDate(value: unknown, fieldName: string): Date | null {

@@ -61,15 +61,41 @@ export class AuthService {
     return this.createAuthResponse(user);
   }
 
+  async refresh(refreshToken: string | null) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token is required');
+    }
+
+    const payload = this.jwtService.verifyRefreshToken(refreshToken);
+    const user = await this.usersService.findById(payload.sub);
+
+    if (!user) {
+      throw new UnauthorizedException('User no longer exists');
+    }
+
+    return this.createAuthResponse(user);
+  }
+
+  getRefreshTokenMaxAgeMs(): number {
+    return this.jwtService.getRefreshTokenMaxAgeMs();
+  }
+
+  getAccessTokenMaxAgeMs(): number {
+    return this.jwtService.getAccessTokenMaxAgeMs();
+  }
+
   private createAuthResponse(user: User) {
     const publicUser = this.usersService.toPublicUser(user);
-    const accessToken = this.jwtService.sign({
+    const tokenPayload = {
       sub: publicUser.id,
       email: publicUser.email,
-    });
+    };
+    const accessToken = this.jwtService.signAccessToken(tokenPayload);
+    const refreshToken = this.jwtService.signRefreshToken(tokenPayload);
 
     return {
       accessToken,
+      refreshToken,
       tokenType: 'Bearer',
       user: publicUser,
     };
